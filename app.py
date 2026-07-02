@@ -67,21 +67,51 @@ if "pets" not in st.session_state:
     st.session_state["pets"] = []
 
 if st.button("Add Pet"):
-    special_needs = [line.strip() for line in special_needs_input.splitlines() if line.strip()]
-    pet = Pet(
-        name=pet_name,
-        species=species,
-        breed=breed,
-        age=age,
-        special_needs=special_needs,
-    )
-    st.session_state["pets"].append(pet)
-    if pet.has_special_needs():
-        st.warning(f"⚠️ {pet.name} has special care needs: " + ", ".join(pet.special_needs))
+    st.session_state.pop("_pending_dup", None)
+    if age == 0:
+        st.error("Please enter a valid age for your pet. Age must be at least 1.")
     else:
-        st.success(f"Pet saved: {pet_name} ({species})")
-    st.write("**Pet Profile:**")
-    st.json(pet.get_care_profile())
+        special_needs = [line.strip() for line in special_needs_input.splitlines() if line.strip()]
+        exact_duplicate = any(p.name == pet_name and p.age == age for p in st.session_state["pets"])
+        if exact_duplicate:
+            st.session_state["_pending_dup"] = dict(
+                name=pet_name, species=species, breed=breed, age=age, special_needs=special_needs
+            )
+        else:
+            pet = Pet(
+                name=pet_name,
+                species=species,
+                breed=breed,
+                age=age,
+                special_needs=special_needs,
+            )
+            st.session_state["pets"].append(pet)
+            if pet.has_special_needs():
+                st.warning(f"⚠️ {pet.name} has special care needs: " + ", ".join(pet.special_needs))
+            else:
+                st.success(f"Pet saved: {pet_name} ({species})")
+            st.write("**Pet Profile:**")
+            st.json(pet.get_care_profile())
+
+if "_pending_dup" in st.session_state:
+    d = st.session_state["_pending_dup"]
+    st.warning(f"A pet named '{d['name']}' with age {d['age']} already exists.")
+    if st.button(f"Yes, add {d['name']} anyway", key="confirm_duplicate_pet"):
+        pet = Pet(
+            name=d["name"],
+            species=d["species"],
+            breed=d["breed"],
+            age=d["age"],
+            special_needs=d["special_needs"],
+        )
+        st.session_state["pets"].append(pet)
+        del st.session_state["_pending_dup"]
+        if pet.has_special_needs():
+            st.warning(f"⚠️ {pet.name} has special care needs: " + ", ".join(pet.special_needs))
+        else:
+            st.success(f"Pet saved: {pet.name} ({pet.species})")
+        st.write("**Pet Profile:**")
+        st.json(pet.get_care_profile())
 
 if st.session_state["pets"]:
     active_pet_name = st.selectbox("Active pet", options=[p.name for p in st.session_state["pets"]])

@@ -36,6 +36,7 @@ Your final app should:
 - Task removal via "Remove" button (`Owner.remove_task()`)
 - Pet profile display using `get_care_profile()` and `has_special_needs()`
 - Priority tiebreaker scheduling based on owner's preferred time of day (`Schedule.generate()`)
+- Input validation on the Add Pet form: age must be at least 1, and adding a pet with the same name and age as an existing pet requires explicit confirmation before the duplicate is saved
 
 ## Getting started
 
@@ -148,7 +149,7 @@ The main page lays out all inputs in a single vertical flow, nothing hidden or g
 
 **Owner section** — three fields at the top: "Owner name" (text), "Available minutes per day" (number, 15–600), and "Preferred time of day" (selectbox: morning / afternoon / evening). These update the live `Owner` object in session state on every render.
 
-**Pet section** — five fields: "Pet name" (text), "Species" (selectbox: dog / cat / other), "Breed" (text), "Age" (number, 0–30), and "Special needs" (text area, one need per line). Clicking **Add Pet** instantiates a `Pet`, appends it to the `pets` list in session state, and immediately renders the pet's full profile via `pet.get_care_profile()` as an expandable JSON block. If the pet has any special needs, a yellow warning badge lists them; otherwise a green success toast confirms the save.
+**Pet section** — five fields: "Pet name" (text), "Species" (selectbox: dog / cat / other), "Breed" (text), "Age" (number, 0–30), and "Special needs" (text area, one need per line). Clicking **Add Pet** instantiates a `Pet`, appends it to the `pets` list in session state, and immediately renders the pet's full profile via `pet.get_care_profile()` as an expandable JSON block. If the pet has any special needs, a yellow warning badge lists them; otherwise a green success toast confirms the save. Clicking Add Pet also validates that age is at least 1 — a zero age is rejected with an error — and if a pet with the same name and age already exists, a warning appears with a confirmation button that must be clicked before the duplicate is saved.
 
 **Active pet selector** — once two or more pets exist, a selectbox labeled "Active pet" appears so you can switch context between registered pets. All subsequent task additions and schedule generation are scoped to whichever pet is selected here.
 
