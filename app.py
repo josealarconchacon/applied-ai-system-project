@@ -220,28 +220,31 @@ if st.button("Generate schedule"):
             available_minutes=st.session_state["owner"].available_minutes_per_day,
         )
         st.session_state["schedule"] = schedule
-        st.success(schedule.get_summary())
-        if schedule.skipped_tasks:
-            st.warning(schedule.get_skipped_summary())
 
-        st.subheader("📅 Sorted by Time")
-        sorted_tasks = schedule.sort_by_time()
-        st.table([{"name": task.name, "scheduled_time": task.scheduled_time} for _, task in sorted_tasks])
+if st.session_state.get("schedule"):
+    schedule = st.session_state["schedule"]
+    st.success(schedule.get_summary())
+    if schedule.skipped_tasks:
+        st.warning(schedule.get_skipped_summary())
 
-        st.subheader("⚠️ Conflict Warnings")
-        warnings = schedule.detect_conflicts()
-        if warnings:
-            for warning in warnings:
-                st.error(warning)
-        else:
-            st.success("No scheduling conflicts detected.")
+    st.subheader("📅 Sorted by Time")
+    sorted_tasks = schedule.sort_by_time()
+    st.table([{"name": task.name, "scheduled_time": task.scheduled_time} for _, task in sorted_tasks])
 
-        st.subheader("🔍 Filter by Status")
-        status_filter = st.radio("Filter by status", ["All", "Completed", "Incomplete"], index=0)
-        if status_filter == "All":
-            filtered = schedule.filter_tasks(completed=None)
-        elif status_filter == "Completed":
-            filtered = schedule.filter_tasks(completed=True)
-        else:
-            filtered = schedule.filter_tasks(completed=False)
-        st.table([{"name": t.name, "scheduled_time": t.scheduled_time} for t in filtered])
+    st.subheader("⚠️ Conflict Warnings")
+    warnings = schedule.detect_conflicts()
+    if warnings:
+        for warning in warnings:
+            st.error(warning)
+    else:
+        st.success("No scheduling conflicts detected.")
+
+    st.subheader("🔍 Filter by Status")
+    status_filter = st.radio("Filter by status", ["All", "Completed", "Incomplete"], index=0)
+    if status_filter == "All":
+        filtered = schedule.filter_tasks(completed=None)
+    elif status_filter == "Completed":
+        filtered = schedule.filter_tasks(completed=True)
+    else:
+        filtered = schedule.filter_tasks(completed=False)
+    st.table([{"name": t.name, "scheduled_time": t.scheduled_time} for t in filtered])
