@@ -159,11 +159,44 @@ if st.button("Add task"):
 
 if st.session_state["owner"].get_tasks():
     st.write("Current tasks:")
+    st.markdown("""
+    <style>
+    div[data-testid="stButton"] button {
+        border: 1px solid #555;
+        background-color: transparent;
+        border-radius: 6px;
+        padding: 4px 12px;
+        font-size: 14px;
+        white-space: nowrap;
+        width: 100%;
+    }
+    div[data-testid="stButton"] button:hover {
+        border-color: #888;
+        background-color: #2a2a2a;
+    }
+    div[data-testid="stVerticalBlock"] div[data-testid="stText"] p,
+    div[data-testid="stMarkdownContainer"] p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    div[data-testid="stHorizontalBlock"] {
+        border-top: 1px solid #555;
+    }
+    div[data-testid="stHorizontalBlock"] div[data-testid="column"] {
+        border-right: 1px solid #555;
+        padding: 8px 10px;
+    }
+    # div[data-testid="stHorizontalBlock"] div[data-testid="column"]:first-child {
+    #     border-left: 1px solid #555;
+    # }
+    </style>
+    """, unsafe_allow_html=True)
     tasks_snapshot = list(st.session_state["owner"].get_tasks())
     task_to_complete = None
     task_to_remove = None
     for task in tasks_snapshot:
-        cols = st.columns([3, 2, 2, 2, 2, 2, 2, 2])
+        cols = st.columns([2, 1.2, 1.2, 1.2, 1.2, 1.5, 1.2, 1.2])
         cols[0].write(task.name)
         cols[1].write(task.scheduled_time)
         cols[2].write(f"{task.duration_minutes} min")
@@ -177,9 +210,9 @@ if st.session_state["owner"].get_tasks():
         else:
             date_label = task.schedule_date.strftime("%b %d")
         cols[5].write(date_label)
-        if cols[6].button("Mark complete", key=f"complete_{id(task)}"):
+        if cols[6].button("✔", key=f"complete_{id(task)}", use_container_width=True):
             task_to_complete = task
-        if cols[7].button("Remove", key=f"remove_{id(task)}"):
+        if cols[7].button("✕", key=f"remove_{id(task)}", use_container_width=True):
             task_to_remove = task
     if task_to_complete is not None:
         was_already_completed = task_to_complete.completed
