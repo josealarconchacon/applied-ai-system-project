@@ -42,11 +42,21 @@ At minimum, your system should:
 st.divider()
 
 st.subheader("Quick Demo Inputs (UI only)")
-owner_name = st.text_input("Owner name", value="Jordan")
-available_minutes_per_day = st.number_input(
-    "Available minutes per day", min_value=15, max_value=600, value=90
-)
-owner_preferred_time = st.selectbox("Preferred time of day", ["morning", "afternoon", "evening"], index=0, key="owner_preferred_time")
+
+row1_col1, row1_col2 = st.columns([1, 1])
+with row1_col1:
+    owner_name = st.text_input("Owner name", value="Jordan")
+with row1_col2:
+    available_minutes_per_day = st.number_input(
+        "Available minutes per day", min_value=15, max_value=600, value=90
+    )
+
+row2_col1, row2_col2 = st.columns([1, 1])
+with row2_col1:
+    owner_preferred_time = st.selectbox("Preferred time of day", ["morning", "afternoon", "evening"], index=0, key="owner_preferred_time")
+with row2_col2:
+    pet_name = st.text_input("Pet name", value="Mochi")
+
 if "owner" not in st.session_state:
     st.session_state["owner"] = Owner(
         name=owner_name,
@@ -57,16 +67,25 @@ else:
     st.session_state["owner"].name = owner_name
     st.session_state["owner"].set_availability(available_minutes_per_day)
     st.session_state["owner"].preferences = {"preferred_time_of_day": owner_preferred_time}
-pet_name = st.text_input("Pet name", value="Mochi")
-species = st.selectbox("Species", ["dog", "cat", "other"])
-breed = st.text_input("Breed", value="Unknown")
-age = st.number_input("Age", min_value=0, max_value=30, value=0)
+
+row3_col1, row3_col2, row3_col3 = st.columns([1, 1, 1])
+with row3_col1:
+    species = st.selectbox("Species", ["dog", "cat", "other"])
+with row3_col2:
+    breed = st.text_input("Breed", value="Unknown")
+with row3_col3:
+    age = st.number_input("Age", min_value=0, max_value=30, value=0)
+
 special_needs_input = st.text_area("Special needs (one per line, optional)", value="")
 
 if "pets" not in st.session_state:
     st.session_state["pets"] = []
 
-if st.button("Add Pet"):
+row5_col1, row5_col2 = st.columns([1, 3])
+with row5_col1:
+    add_pet_clicked = st.button("Add Pet")
+
+if add_pet_clicked:
     st.session_state.pop("_pending_dup", None)
     if age == 0:
         st.error("Please enter a valid age for your pet. Age must be at least 1.")
