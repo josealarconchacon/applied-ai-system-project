@@ -37,6 +37,7 @@ Your final app should:
 - Pet profile display using `get_care_profile()` and `has_special_needs()`
 - Priority tiebreaker scheduling based on owner's preferred time of day (`Schedule.generate()`)
 - Input validation on the Add Pet form: age must be at least 1, and adding a pet with the same name and age as an existing pet requires explicit confirmation before the duplicate is saved
+- Agentic scheduling workflow that plans, generates, checks for conflicts, and self-corrects by rescheduling the lower-priority (or tiebreak-losing) task past the conflicting task's duration (`SchedulingAgent` in `agent.py`)
 
 ## Getting started
 
@@ -99,6 +100,24 @@ Morning Walk: 14:00
 
 === Conflict Detection ===
   Conflict: 'Medication' and 'Dental Cleaning' both scheduled at 09:00
+```
+
+## 🤖 Agentic Workflow Demo
+
+```
+=== Agentic Workflow Demo ===
+Agent status: resolved
+Agent log:
+  [plan] Planning to schedule 2 task(s) within 90 available minute(s). (ok)
+  [act] Generated schedule with 2 slot(s). (ok)
+  [check] Found 1 conflict(s). (conflict_found)
+  [resolve] Moved 'Nail Trim' from 09:00 to 09:20, clearing 'Bath''s 20-minute duration (lower priority than 'Bath'). (resolved)
+  [check] No conflicts detected. (ok)
+  [run] All conflicts resolved. (resolved)
+Resulting schedule:
+Schedule for Luna on 2026-07-25 (Owner: Alex Rivera):
+  09:00 — Bath [Hygiene] — 20 min [priority: high]
+  09:20 — Nail Trim [Hygiene] — 10 min [priority: low]
 ```
 
 ## 🧪 Testing PawPal+
