@@ -203,9 +203,12 @@ class Schedule:
         lines = [f"Schedule for {self.pet.name} on {self.date} (Owner: {self.owner.name}):"]
         base_hour, base_minute = 8, 0
         for offset_minutes, task in self.slots:
-            total = base_hour * 60 + base_minute + offset_minutes
-            h, m = divmod(total, 60)
-            lines.append(f"  {h:02d}:{m:02d} — {task.get_display_label()}")
+            if task.scheduled_time:
+                lines.append(f"  {task.scheduled_time} — {task.get_display_label()}")
+            else:
+                total = base_hour * 60 + base_minute + offset_minutes
+                h, m = divmod(total, 60)
+                lines.append(f"  {h:02d}:{m:02d} — {task.get_display_label()}")
         lines.append(f"Total time used: {self.total_minutes_used} min")
         return "\n".join(lines)
 

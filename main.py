@@ -3,6 +3,8 @@
 # importing the classes from pawpal_system.py
 from datetime import date
 from pawpal_system import Pet, Task, Owner, Schedule
+from agent import SchedulingAgent
+import json
 
 # --- Owner ---
 owner = Owner(
@@ -90,6 +92,30 @@ conflict_task2 = Task(
     pet_name="Luna"
 )
 
+agent_task_a = Task(
+    name="Bath",
+    category="Hygiene",
+    duration_minutes=20,
+    priority="high",
+    frequency="daily",
+    preferred_time_of_day="morning",
+    completed=False,
+    scheduled_time="09:00",
+    pet_name="Luna"
+)
+
+agent_task_b = Task(
+    name="Nail Trim",
+    category="Hygiene",
+    duration_minutes=10,
+    priority="low",
+    frequency="daily",
+    preferred_time_of_day="morning",
+    completed=False,
+    scheduled_time="09:00",
+    pet_name="Luna"
+)
+
 # --- Luna's schedule: Walk + Feeding ---
 schedule_luna = Schedule(schedule_date=date.today(), owner=owner, pet=pet1)
 schedule_luna.generate(tasks=[task1, task2], available_minutes=owner.available_minutes_per_day)
@@ -150,4 +176,22 @@ print()
 print("=== Conflict Detection ===")
 for warning in schedule_conflict.detect_conflicts():
     print(f"  {warning}")
+
+print()
+print("=== Agentic Workflow Demo ===")
+
+
+agent_schedule = Schedule(schedule_date=date.today(), owner=owner, pet=pet1)
+agent = SchedulingAgent(agent_schedule)
+result = agent.run(tasks=[agent_task_a, agent_task_b], available_minutes=owner.available_minutes_per_day)
+
+print(f"Agent status: {result['status']}")
+print()
+print("Agent log:")
+for entry in result["log"]:
+    print(f"  [{entry['step']}] {entry['detail']} ({entry['result']})")
+
+print()
+print("Resulting schedule:")
+print(agent_schedule.get_summary())
 

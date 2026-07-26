@@ -2,6 +2,7 @@ import re
 import streamlit as st
 from datetime import date, timedelta
 from pawpal_system import Owner, Pet, Task, Schedule
+from agent import SchedulingAgent
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -267,11 +268,13 @@ if st.button("Generate schedule"):
             pet=active_pet,
         )
         pet_tasks = [t for t in st.session_state["owner"].get_tasks() if t.pet_name == active_pet_name]
-        schedule.generate(
+        agent = SchedulingAgent(schedule)
+        result = agent.run(
             tasks=pet_tasks,
             available_minutes=st.session_state["owner"].available_minutes_per_day,
         )
         st.session_state["schedule"] = schedule
+        st.session_state["agent_result"] = result
 
 if st.session_state.get("schedule"):
     schedule = st.session_state["schedule"]
@@ -300,3 +303,16 @@ if st.session_state.get("schedule"):
     else:
         filtered = schedule.filter_tasks(completed=False)
     st.table([{"name": t.name, "scheduled_time": t.scheduled_time} for t in filtered])
+
+    st.subheader("🤖 Agent Activity Log")
+    agent_result = st.session_state.get("agent_result")
+    if agent_result:
+        status = agent_result["status"]
+        if status == "resolved":
+            st.success(f"Agent status: {status}")
+        elif status == "unresolved":
+            st.warning(f"Agent status: {status}")
+        else:
+            st.error(f"Agent status: {status}")
+        with st.expander("View full agent log"):
+            st.table(agent_result["log"])

@@ -60,14 +60,15 @@ class SchedulingAgent:
                 continue
 
             mover, reason = self._pick_mover(task_a, task_b, preferred_time_of_day)
+            stayer = task_a if mover is task_b else task_b
 
             old_time = mover.scheduled_time
-            new_time = self._shift_15_minutes(old_time)
+            new_time = self._shift_after(stayer)
             mover.scheduled_time = new_time
 
             self._log(
                 "resolve",
-                f"Moved '{mover.name}' from {old_time} to {new_time} ({reason}).",
+                f"Moved '{mover.name}' from {old_time} to {new_time}, clearing '{stayer.name}''s {stayer.duration_minutes}-minute duration ({reason}).",
                 "resolved",
             )
 
@@ -85,9 +86,9 @@ class SchedulingAgent:
         mover, stayer = (task_a, task_b) if task_a.name > task_b.name else (task_b, task_a)
         return mover, f"alphabetically later than '{stayer.name}'"
 
-    def _shift_15_minutes(self, time_str: str) -> str:
-        base = datetime.strptime(time_str, "%H:%M")
-        shifted = base + timedelta(minutes=15)
+    def _shift_after(self, anchor_task: Task) -> str:
+        base = datetime.strptime(anchor_task.scheduled_time, "%H:%M")
+        shifted = base + timedelta(minutes=anchor_task.duration_minutes)
         return shifted.strftime("%H:%M")
 
     def run(self, tasks, available_minutes) -> dict:
