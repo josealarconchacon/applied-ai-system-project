@@ -1,12 +1,12 @@
 flowchart LR
-    IN["📥 Input<br/>Owner + Pet + Tasks"] --> AGENT
+    IN["📥 - Input<br/>Owner + Pet + Tasks"] --> AGENT
 
-    subgraph AGENT["🤖 SchedulingAgent"]
+    subgraph AGENT["🤖 - SchedulingAgent"]
         direction LR
         PLAN["Plan"] --> ACT["Act<br/>(build schedule)"] --> CHECK{"Check<br/>conflicts?"}
         CHECK -->|Yes| RESOLVE["Resolve<br/>(reschedule task)"] --> CHECK
     end
 
-    CHECK -->|No| OUT["📤 Output<br/>Conflict-free schedule + log"]
-    OUT --> TEST["✅ Testing<br/>26 pytest cases"]
-    OUT --> HUMAN["🧑 Human Review<br/>Diff checked before accepting"]
+    CHECK -->|No| OUT["📤 - Output<br/>Conflict-free schedule + log"]
+    OUT --> TEST["✅ - Testing<br/>26 pytest cases"]
+    OUT --> HUMAN["🧑 - Human Review<br/>Diff checked before accepting"]
