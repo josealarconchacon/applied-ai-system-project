@@ -1,26 +1,12 @@
-# PawPal+ (Module 2 Project)
+# PawPal+ — Applied AI System (Agentic Scheduling)
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+## Base Project
 
-## Scenario
+This project extends **PawPal+**, originally built as a Module 2 assignment. The original PawPal+ is a Streamlit app that helps a pet owner plan daily care tasks (walks, feeding, meds, grooming) for one or more pets, generating a priority-based schedule that fits within a daily time budget and detecting scheduling conflicts within a single pet's tasks.
 
-A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
+## Summary
 
-- Track pet care tasks (walks, feeding, meds, enrichment, grooming, etc.)
-- Consider constraints (time available, priority, owner preferences)
-- Produce a daily plan and explain why it chose that plan
-
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
-
-## What you will build
-
-Your final app should:
-
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+PawPal+ now includes an **agentic scheduling workflow**: instead of just detecting scheduling conflicts and reporting them, a `SchedulingAgent` plans, generates, checks its own work, and automatically resolves conflicts by rescheduling the lower-priority task past the higher-priority task's full duration. This turns a passive conflict _detector_ into an active conflict _resolver_, fully logged and testable.
 
 ## ✨ Features
 
@@ -38,6 +24,10 @@ Your final app should:
 - Priority tiebreaker scheduling based on owner's preferred time of day (`Schedule.generate()`)
 - Input validation on the Add Pet form: age must be at least 1, and adding a pet with the same name and age as an existing pet requires explicit confirmation before the duplicate is saved
 - Agentic scheduling workflow that plans, generates, checks for conflicts, and self-corrects by rescheduling the lower-priority (or tiebreak-losing) task past the conflicting task's duration (`SchedulingAgent` in `agent.py`)
+
+## 🏗️ Architecture Overview
+
+The system's data flow is documented in `diagrams/architecture.mmd` (Mermaid source). At a high level: Owner/Pet/Task input flows into the `SchedulingAgent`, which runs a Plan → Act → Check → Resolve loop against the `Schedule` class until no conflicts remain (capped at 3 attempts). The resulting conflict-free schedule and a structured activity log are the output, which then get verified two ways: an automated pytest suite and manual review of AI-generated code changes before acceptance.
 
 ## Getting started
 
@@ -59,7 +49,9 @@ pip install -r requirements.txt
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
 
-## 🖥️ Sample Output
+The following are real, reproducible input/output pairs from this system — not illustrative examples.
+
+## 🖥️ Sample Interactions
 
 ```
 === Today's Schedule ===
@@ -120,6 +112,16 @@ Schedule for Luna on 2026-07-25 (Owner: Alex Rivera):
   09:20 — Nail Trim [Hygiene] — 10 min [priority: low]
 ```
 
+## 🧠 Design Decisions
+
+**Rule-based agent, not an LLM call.** An agentic workflow just means something that can plan, act, and check its own work, it doesn't have to involve calling a model. I kept mine rule-based on purpose. I needed the agent's behavior to be predictable so I could actually test it. Adding an LLM call would've introduced randomness into the exact part of the system meant to prove it's reliable, which felt like working against myself. It also meant one less thing that could break, no API keys, no rate limits, no network calls failing mid-loop.
+
+**Tiebreak order for conflict resolution:** priority first, then the owner's preferred time of day, then alphabetical order as a last resort. I used the same order `Schedule.generate()` already uses for its own tiebreaks, since I didn't want two different rules in the same system for deciding "which task wins." One consistent rule is easier to reason about and easier to explain later.
+
+**Shifting past the conflicting task's actual duration, not a fixed increment.** My first version just moved the losing task by a flat 15 minutes. That worked fine until I tested it against a longer task and realized 15 minutes wasn't always enough, the moved task could still land right in the middle of it. So I changed it to shift the task to start exactly when the other one ends. Now it's guaranteed to clear, not just usually clear.
+
+**A cap on how many times the agent will try to fix things (`max_resolution_attempts`, default 3).** I didn't want the agent stuck retrying forever if it ran into a conflict it genuinely couldn't resolve. Capping it at 3 attempts means it always stops, one way or another, and honestly reports `"unresolved"` if it couldn't finish the job instead of just hanging.
+
 ## 🧪 Testing PawPal+
 
 ```bash
@@ -146,6 +148,8 @@ tests/test_pawpal.py .................                                      [100
 ```
 
 The 19 tests cover the core scheduling behaviors built into PawPal+, marking tasks as complete and verifying that daily/weekly recurring tasks correctly generate a next occurrence. They also validate schedule generation, making sure high-priority tasks are placed first and that tasks exceeding the available time budget get skipped. Beyond that, the suite checks that `sort_by_time()` returns slots in the right order, that `filter_tasks()` correctly narrows results by completion status or pet name, and that `detect_conflicts()` catches two tasks assigned to the same time slot.
+
+Since the agentic workflow was added, the suite has grown to 26 tests total: the original 19 plus 7 new tests in `test_agent.py` covering the `SchedulingAgent`'s no-conflict path, priority-based tiebreak, alphabetical tiebreak, full step-by-step logging, error handling when `act()` fails, the `max_resolution_attempts` cutoff, and most importantly, a test that checks the agent's conflict resolution clears a task's _entire_ duration. That last test exists specifically because an earlier version of the agent only shifted a conflicting task by a flat 15 minutes, which could still overlap a longer task. The test now locks in the fix.
 
 Confidence Level: ⭐⭐⭐½ (3.5/5)
 
@@ -235,3 +239,9 @@ Morning Walk: 14:00
 ```
 
 **Screenshot or video** _(optional)_: <!-- Insert a screenshot or link to a demo video here -->
+
+## 💭 Reflection
+
+Extending a system I already understood made it much easier to isolate what the new AI feature was actually responsible for, versus behavior inherited from the original design. The main lesson from this phase was that verifying an AI-generated fix means checking the actual math, not just whether tests pass or the tool claims a change was made correctly.
+
+A deeper reflection on AI collaboration during this project, specific helpful/flawed AI suggestions, and system limitations is documented in `model_card.md`.
