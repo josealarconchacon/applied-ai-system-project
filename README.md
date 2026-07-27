@@ -257,3 +257,5 @@ Morning Walk: 14:00
 ## 💭 Reflection
 
 Extending a system I already understood made it much easier to isolate what the new AI feature was actually responsible for, versus behavior inherited from the original design. The main lesson from this phase was that verifying an AI-generated fix means checking the actual math, not just whether tests pass or the tool claims a change was made correctly.
+
+A deeper reflection on AI collaboration during this project, specific helpful/flawed AI suggestions, and system limitations is documented in `model_card.md`.
