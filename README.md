@@ -122,6 +122,20 @@ Schedule for Luna on 2026-07-25 (Owner: Alex Rivera):
 
 **A cap on how many times the agent will try to fix things (`max_resolution_attempts`, default 3).** I didn't want the agent stuck retrying forever if it ran into a conflict it genuinely couldn't resolve. Capping it at 3 attempts means it always stops, one way or another, and honestly reports `"unresolved"` if it couldn't finish the job instead of just hanging.
 
+## 🛡️ Reliability & Guardrails
+
+The agent's reliability mechanisms are verified by specific tests in `test_agent.py`. Each row below is a real, passing test case.
+
+| Test Input                                                                   | Guardrail / Mechanism                        | Result                                                                                                                                             |
+| ---------------------------------------------------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Two tasks, same time, different priority                                     | Conflict resolution + priority tiebreak      | ✅ Pass — lower-priority task moved, higher-priority task untouched                                                                                |
+| Two tasks, same time, same priority, neither matching owner's preferred time | Alphabetical tiebreak fallback               | ✅ Pass — alphabetically later task moved                                                                                                          |
+| `tasks=[None]` (invalid input)                                               | `try/except` guardrail inside `act()`        | ✅ Pass — returns `status: "error"` and logs the failure instead of crashing                                                                       |
+| A conflict that never clears (mocked `detect_conflicts()`)                   | `max_resolution_attempts` cap                | ✅ Pass — agent stops after the configured attempt limit and reports `status: "unresolved"` instead of looping forever                             |
+| Two tasks, same time, different durations                                    | Duration-aware shift (not a fixed increment) | ✅ Pass — the moved task is shifted past the _entire_ other task's duration, confirmed by an exact time assertion, not just "some change happened" |
+
+These five tests, alongside the other 21 in the suite, run automatically with `pytest tests/test_agent.py tests/test_pawpal.py`.
+
 ## 🧪 Testing PawPal+
 
 ```bash
@@ -243,5 +257,3 @@ Morning Walk: 14:00
 ## 💭 Reflection
 
 Extending a system I already understood made it much easier to isolate what the new AI feature was actually responsible for, versus behavior inherited from the original design. The main lesson from this phase was that verifying an AI-generated fix means checking the actual math, not just whether tests pass or the tool claims a change was made correctly.
-
-A deeper reflection on AI collaboration during this project, specific helpful/flawed AI suggestions, and system limitations is documented in `model_card.md`.
