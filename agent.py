@@ -68,7 +68,7 @@ class SchedulingAgent:
 
             self._log(
                 "resolve",
-                f"Moved '{mover.name}' from {old_time} to {new_time}, clearing '{stayer.name}''s {stayer.duration_minutes}-minute duration ({reason}).",
+                f"Moved '{mover.name}' from {old_time} to {new_time}, clearing {stayer.duration_minutes} minutes for '{stayer.name}' ({reason}).",
                 "resolved",
             )
 

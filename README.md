@@ -103,13 +103,14 @@ Agent log:
   [plan] Planning to schedule 2 task(s) within 90 available minute(s). (ok)
   [act] Generated schedule with 2 slot(s). (ok)
   [check] Found 1 conflict(s). (conflict_found)
-  [resolve] Moved 'Nail Trim' from 09:00 to 09:20, clearing 'Bath''s 20-minute duration (lower priority than 'Bath'). (resolved)
+  [resolve] Moved 'Nail Trim' from 09:00 to 09:20, clearing 20 minutes for 'Bath' (lower priority than 'Bath'). (resolved)
   [check] No conflicts detected. (ok)
   [run] All conflicts resolved. (resolved)
 Resulting schedule:
-Schedule for Luna on 2026-07-25 (Owner: Alex Rivera):
+Schedule for Luna on 2026-07-31 (Owner: Alex Rivera):
   09:00 — Bath [Hygiene] — 20 min [priority: high]
   09:20 — Nail Trim [Hygiene] — 10 min [priority: low]
+Total time used: 30 min
 ```
 
 ## 🧠 Design Decisions
@@ -135,6 +136,28 @@ The agent's reliability mechanisms are verified by specific tests in `test_agent
 | Two tasks, same time, different durations                                    | Duration-aware shift (not a fixed increment) | ✅ Pass — the moved task is shifted past the _entire_ other task's duration, confirmed by an exact time assertion, not just "some change happened" |
 
 These five tests, alongside the other 21 in the suite, run automatically with `pytest tests/test_agent.py tests/test_pawpal.py`.
+
+## 📊 Evaluation Harness (Stretch)
+
+I built a separate script, `evaluation_harness.py`, that runs the agent through 5 predefined scenarios and prints a pass/fail summary. It's not pytest, just a plain script.
+
+```bash
+python evaluation_harness.py
+```
+
+Real output from an actual run:
+
+```
+Scenario 1 (No Conflict): PASS
+Scenario 2 (Priority Tiebreak): PASS
+Scenario 3 (Alphabetical Tiebreak): PASS
+Scenario 4 (Invalid Input Handling): PASS
+Scenario 5 (Duration-Aware Shift): PASS
+
+Summary: 5/5 scenarios passed
+```
+
+Each scenario checks something specific, exact scheduled times, exact status values, not just "did the script run without crashing." Scenario 5 is the one I care about most, it confirms the duration-aware fix from Design Decisions actually works: the moved task lands at exactly the time the other task ends.
 
 ## 🧪 Testing PawPal+
 
