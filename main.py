@@ -4,7 +4,6 @@
 from datetime import date
 from pawpal_system import Pet, Task, Owner, Schedule
 from agent import SchedulingAgent
-import json
 
 # --- Owner ---
 owner = Owner(
