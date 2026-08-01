@@ -4,6 +4,8 @@
 
 ---
 
+> The section below is from the original PawPal+ (Module 2) project, kept here for history.
+
 ## Agent Workflow (SF7)
 
 > Document your experience using an AI agent (e.g., Cursor Agent, Claude, Copilot) to make multi-step changes autonomously.
@@ -38,3 +40,29 @@ The agent didn't flag that tasks added before a pet existed would get pet_name=N
 **Which approach did you use in your final implementation and why?**
 
 <!-- Your conclusion -->
+
+---
+
+## Agentic Workflow Enhancement — Applied AI System (Project 4, Stretch)
+
+This is the multi-step agent I built for the Applied AI System project (`agent.py`), separate from the Module 2 work above. The agent doesn't just run once and stop, it plans, builds a schedule, checks for conflicts, and if it finds any, fixes them and checks again before it's done.
+
+Here's a real run, pulled straight from `main.py`, not something I made up for this doc:
+
+```
+=== Agentic Workflow Demo ===
+Agent status: resolved
+Agent log:
+[plan] Planning to schedule 2 task(s) within 90 available minute(s). (ok)
+[act] Generated schedule with 2 slot(s). (ok)
+[check] Found 1 conflict(s). (conflict_found)
+[resolve] Moved 'Nail Trim' from 09:00 to 09:20, clearing 'Bath''s 20-minute duration (lower priority than 'Bath'). (resolved)
+[check] No conflicts detected. (ok)
+[run] All conflicts resolved. (resolved)
+Resulting schedule:
+Schedule for Luna on 2026-07-25 (Owner: Alex Rivera):
+09:00 — Bath [Hygiene] — 20 min [priority: high]
+09:20 — Nail Trim [Hygiene] — 10 min [priority: low]
+```
+
+What I like about this trace is the `resolve` line actually says _why_ it moved Nail Trim instead of Bath, "lower priority than 'Bath'", not just that something moved. That reasoning shows up for every kind of tiebreak the agent uses, so if I ever needed to explain why the agent made a specific call, the log already has the answer.
