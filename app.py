@@ -19,30 +19,26 @@ Use this app as your interactive demo once your backend classes/functions exist.
 """
 )
 
-info_col1, info_col2 = st.columns(2)
-
-with info_col1:
-    with st.expander("Scenario", expanded=False):
-        st.markdown(
-            """
+with st.expander("Scenario", expanded=True):
+    st.markdown(
+        """
 **PawPal+** is a pet care planning assistant. It helps a pet owner plan care tasks
 for their pet(s) based on constraints like time, priority, and preferences.
 
 You will design and implement the scheduling logic and connect it to this Streamlit UI.
 """
-        )
+    )
 
-with info_col2:
-    with st.expander("What you need to build", expanded=False):
-        st.markdown(
-            """
+with st.expander("What you need to build", expanded=True):
+    st.markdown(
+        """
 At minimum, your system should:
 - Represent pet care tasks (what needs to happen, how long it takes, priority)
 - Represent the pet and the owner (basic info and preferences)
 - Build a plan/schedule for a day that chooses and orders tasks based on constraints
 - Explain the plan (why each task was chosen and when it happens)
 """
-        )
+    )
 
 st.divider()
 
@@ -146,6 +142,7 @@ else:
 st.markdown("### Tasks")
 st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
 
+st.markdown("<div style='margin-top: 12px;'></div>", unsafe_allow_html=True)
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     task_title = st.text_input("Task title", value="Morning walk")
@@ -158,7 +155,11 @@ with col4:
 with col5:
     task_preferred_time = st.selectbox("Preferred time of day", ["morning", "afternoon", "evening"], index=0, key="task_preferred_time")
 
-if st.button("Add task"):
+add_task_col1, add_task_col2 = st.columns([1, 3])
+with add_task_col1:
+    add_task_clicked = st.button("Add task")
+
+if add_task_clicked:
     if active_pet_name is None:
         st.error("Add a pet and select it as the active pet before adding tasks.")
     elif not task_title or not task_title.strip():
@@ -196,7 +197,13 @@ if st.session_state["owner"].get_tasks():
     }
     div[data-testid="stButton"] button:hover {
         border-color: #888;
-        background-color: #2a2a2a;
+        background-color: #e0e0e0;
+    }
+    div[data-testid="stButton"] button:focus,
+    div[data-testid="stButton"] button:focus:not(:active) {
+        border-color: #c9c9c9 !important;
+        color: #333333 !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
     }
     div[data-testid="stVerticalBlock"] div[data-testid="stText"] p,
     div[data-testid="stMarkdownContainer"] p {
