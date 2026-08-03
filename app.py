@@ -189,7 +189,6 @@ if st.session_state["owner"].get_tasks():
     div[data-testid="stButton"] button {
         border: 1px solid #555;
         background-color: transparent;
-        border-radius: 6px;
         padding: 4px 12px;
         font-size: 14px;
         white-space: nowrap;
